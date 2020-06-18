@@ -5,6 +5,8 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const COMMAND_PREFIX = "!";
 
+var voiceConnection;
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -76,8 +78,8 @@ async function commandHandler(message, command, args) {
     }
     if (command === "voice") {
         if (message.member.voice.channel) {
-            const connection = await message.member.voice.channel.join();
-            const dispatcher = connection.play(__dirname+"/res/sounds/welcome.mp3");
+            voiceConnection = await message.member.voice.channel.join();
+            const dispatcher = voiceConnection.play(__dirname+"/res/sound/welcome.mp3");
 
             dispatcher.on('start', () => {
                 console.log('audio.mp3 is now playing!');
@@ -92,7 +94,16 @@ async function commandHandler(message, command, args) {
             return message.reply("You're not in a voice channel.");
         }
     }
-    message.reply("Whoops I don't know that one yet!")
+    if(command === "mute") {
+        if(voiceConnection){
+            return await voiceConnection.disconnect();
+        }
+        return;
+    }
+    if(command === "speak") {
+        return await message.channel.send(args,{tts:true});
+    }
+    return message.reply("Whoops I don't know that one yet!")
 }
 
 client.on('message', async message => {
