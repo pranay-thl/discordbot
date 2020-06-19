@@ -177,7 +177,7 @@ async function commandHandler(message, command, args) {
 
 client.on('message', async message => {
     if (message.mentions.has(client.user)) {
-        message.reply("If you wanna talk to me, begin with a !");
+        message.reply("If you wanna talk to me, begin with a "+COMMAND_PREFIX);
         return;
     }
     if (message.content.startsWith(COMMAND_PREFIX) == false) {
