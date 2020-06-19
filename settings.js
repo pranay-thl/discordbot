@@ -1,3 +1,3 @@
 module.exports = {
-    VOICE_SUPPORT = false
+    VOICE_SUPPORT : false
 }
