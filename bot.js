@@ -7,7 +7,7 @@ const movieQuote = require("popular-movie-quotes");
 var settings = require("./settings");
 
 const client = new Discord.Client();
-const COMMAND_PREFIX = "?";
+var COMMAND_PREFIX = "?";
 
 var voiceConnection;
 
@@ -53,6 +53,17 @@ async function commandHandler(message, command, args) {
         if (command.startsWith("be")) {
             message.reply("Und3rline likes jazz !");
             return;
+        }
+        if(command === "settings") {
+            if(args.length>1) {
+                if(args[0] === "prefix" && args[1] !=="" && args[1]!=="undefined" && args[1].length == 1) {
+                    COMMAND_PREFIX = args[1];
+                    return message.reply('Command Prefix updated to '+COMMAND_PREFIX);
+                }
+                else {
+                    return message.reply('Wrong Command!');
+                }
+            }
         }
         if (command === "embed") {
             const exampleEmbed = new Discord.MessageEmbed()
