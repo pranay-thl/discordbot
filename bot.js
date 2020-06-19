@@ -1,7 +1,9 @@
 require('dotenv').config();
 const fs = require('fs');
-
 const Discord = require('discord.js');
+
+var settings = require("./settings");
+
 const client = new Discord.Client();
 const COMMAND_PREFIX = "!";
 
@@ -77,6 +79,9 @@ async function commandHandler(message, command, args) {
         return message.channel.send(`${message.author.username}, your avatar: ${message.author.displayAvatarURL({ dynamic: true })}`);
     }
     if (command === "voice") {
+        if(settings.VOICE_SUPPORT === false) {
+            return await message.channel.send("Sorry, my voice support has been disabled.",{tts:true});
+        }
         if (message.member.voice.channel) {
             voiceConnection = await message.member.voice.channel.join();
             const dispatcher = voiceConnection.play(__dirname+"/res/sound/welcome.mp3");
