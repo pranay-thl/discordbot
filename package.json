@@ -21,9 +21,11 @@
   "homepage": "https://github.com/pranay-thl/discordbot#readme",
   "dependencies": {
     "discord.js": "^12.2.0",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "inspirational-quotes": "^1.0.8",
+    "popular-movie-quotes": "^1.2.4"
   },
-  "optionalDependencies":{
+  "optionalDependencies": {
     "@discordjs/opus": "^0.3.2",
     "ffmpeg": "0.0.4",
     "sodium": "^3.0.2"
