@@ -7,7 +7,7 @@ const movieQuote = require("popular-movie-quotes");
 var settings = require("./settings");
 
 const client = new Discord.Client();
-const COMMAND_PREFIX = "!";
+const COMMAND_PREFIX = "?";
 
 var voiceConnection;
 
