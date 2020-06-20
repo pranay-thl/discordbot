@@ -3,11 +3,16 @@ const fs = require('fs');
 const Discord = require('discord.js');
 const Quote = require('inspirational-quotes');
 const movieQuote = require("popular-movie-quotes");
+const profanities = require('profanities');
+
+const profanitiesWhiteList = ["kill","die"];
 
 var settings = require("./settings");
+var runtime = require("./runtime");
 
+var cussMap = {};
 const client = new Discord.Client();
-var COMMAND_PREFIX = "?";
+var COMMAND_PREFIX = "$";
 
 var voiceConnection;
 
@@ -176,6 +181,16 @@ async function commandHandler(message, command, args) {
 }
 
 client.on('message', async message => {
+    let wordSplit = message.content.split(" ");
+    for(var i=0;i<wordSplit.length;i++) {
+        if(profanities.includes(wordSplit[i]) && profanitiesWhiteList.indexOf(wordSplit[i]) === -1) {
+            runtime.storage.updateProfanityCount(message.author.id).then(()=>{
+                runtime.storage.getProfanityCount(message.author.id).then((res)=>{
+                    return message.reply("Don't say bad words! This is your Warning Number: "+res.data.count);
+                })
+            })
+        }
+    }
     if (message.mentions.has(client.user)) {
         message.reply("If you wanna talk to me, begin with a "+COMMAND_PREFIX);
         return;
@@ -200,4 +215,13 @@ client.on('guildMemberAdd', member => {
     channel.send(`Welcome to the server, ${member}!`);
 });
 
-client.login(process.env.DISCORD_TOKEN);
+runtime.storage.init(settings);
+runtime.storage.connect().then(()=>{
+    client.login(process.env.DISCORD_TOKEN);
+}).otherwise((err)=>{
+    console.log(err);
+})
+
+process.on("uncaughtException", (err)=>{
+    console.log(err);
+})
