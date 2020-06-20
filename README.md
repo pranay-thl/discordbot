@@ -1,9 +1,11 @@
 # discordbot
 A Discord Bot
 
-Presetup:
+Note: The Bot requires a working mongodb connection to start
+Setup:
 
-1. Install libtool: brew install libtool autoconf automake
-2. Install ffmpeg: brew install ffmpeg
+1. Install libtool: (mac)brew install libtool autoconf automake -- optional
+2. Install ffmpeg: (mac)brew install ffmpeg --optional
 3. npm install
-4. node bot.js
+4. configure the following env variables by creating a .env file with following variables : DISCORD_TOKEN, MONGOURI
+5. node bot.js
