@@ -183,7 +183,7 @@ async function commandHandler(message, command, args) {
 client.on('message', async message => {
     let wordSplit = message.content.split(" ");
     for(var i=0;i<wordSplit.length;i++) {
-        if(profanities.includes(wordSplit[i]) && profanitiesWhiteList.indexOf(wordSplit[i]) === -1) {
+        if(profanities.includes(wordSplit[i].toLowerCase()) && profanitiesWhiteList.indexOf(wordSplit[i].toLowerCase()) === -1) {
             runtime.storage.updateProfanityCount(message.author.id).then(()=>{
                 runtime.storage.getProfanityCount(message.author.id).then((res)=>{
                     return message.reply("Don't say bad words! This is your Warning Number: "+res.data.count);
