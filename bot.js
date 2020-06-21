@@ -10,7 +10,7 @@ const profanitiesWhiteList = ["kill","die"];
 var settings = require("./settings");
 var runtime = require("./runtime");
 
-var cussMap = {};
+var sleep = false;
 const client = new Discord.Client();
 var COMMAND_PREFIX = "$";
 
@@ -173,6 +173,18 @@ async function commandHandler(message, command, args) {
         if (command === "chat") {
 
         }
+        if(command === "sleep") {
+            if(message.member.roles.cache.get("707713457713053858")) {
+                sleep = true;
+                return message.channel.send("ZzZzZ....");
+            }
+        }
+        if(command === "wake") {
+            if(message.member.roles.cache.get("707713457713053858")) {
+                sleep = false;
+                return message.channel.send("Rise and Shine !");
+            }
+        }
         return message.reply("Whoops I don't know that one yet!")
     }
     catch (e) {
@@ -181,6 +193,11 @@ async function commandHandler(message, command, args) {
 }
 
 client.on('message', async message => {
+    if(sleep) {
+        if(message.content.startsWith(COMMAND_PREFIX+"wake") === false){
+            return;
+        }
+    }
     let wordSplit = message.content.split(" ");
     for(var i=0;i<wordSplit.length;i++) {
         if(profanities.includes(wordSplit[i].toLowerCase()) && profanitiesWhiteList.indexOf(wordSplit[i].toLowerCase()) === -1) {
