@@ -4,6 +4,7 @@ const Discord = require('discord.js');
 const Quote = require('inspirational-quotes');
 const movieQuote = require("popular-movie-quotes");
 const profanities = require('profanities');
+const dialogflow = require('dialogflow');
 
 const profanitiesWhiteList = ["kill","die"];
 
@@ -19,6 +20,32 @@ var voiceConnection;
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
+
+async function runSample(projectId, userId, msg) {
+    // Create a new session
+    let keyFileName = process.env.KEY_FILE
+    const sessionClient = new dialogflow.SessionsClient({keyFilename:keyFileName});
+    const sessionPath = sessionClient.sessionPath(projectId, userId);
+
+    // The text query request.
+    const request = {
+        session: sessionPath,
+        queryInput: {
+            text: {
+                // The query to send to the dialogflow agent
+                text: msg,
+                // The language used by the client (en-US)
+                languageCode: 'en-US',
+            },
+        },
+    };
+
+    // Send request and log result
+    const responses = await sessionClient.detectIntent(request);
+    const result = responses[0].queryResult;
+    //console.log(`  Response: ${result.fulfillmentText}`);
+    return result.fulfillmentText;
+}
 
 function getUserFromMention(mention) {
     if (!mention) return;
@@ -178,11 +205,17 @@ async function commandHandler(message, command, args) {
                 sleep = true;
                 return message.channel.send("ZzZzZ....");
             }
+            else{
+                return message.reply("You're not authorized to put me to sleep!");
+            }
         }
         if(command === "wake") {
             if(message.member.roles.cache.get("707713457713053858")) {
                 sleep = false;
                 return message.channel.send("Rise and Shine !");
+            }
+            else{
+                return message.reply("You're not authorized to wake me up!");
             }
         }
         return message.reply("Whoops I don't know that one yet!")
@@ -201,16 +234,21 @@ client.on('message', async message => {
     let wordSplit = message.content.split(" ");
     for(var i=0;i<wordSplit.length;i++) {
         if(profanities.includes(wordSplit[i].toLowerCase()) && profanitiesWhiteList.indexOf(wordSplit[i].toLowerCase()) === -1) {
-            runtime.storage.updateProfanityCount(message.author.id).then(()=>{
-                runtime.storage.getProfanityCount(message.author.id).then((res)=>{
-                    return message.reply("Don't say bad words! This is your Warning Number: "+res.data.count);
-                })
-            })
+            await runtime.storage.updateProfanityCount(message.author.id);
+            let profCount = await runtime.storage.getProfanityCount(message.author.id);
+            return message.reply("Don't say bad words! This is your Warning Number: "+profCount.data.count);
         }
     }
     if (message.mentions.has(client.user)) {
-        message.reply("If you wanna talk to me, begin with a "+COMMAND_PREFIX);
-        return;
+        //dialogflow
+        if(message.content.startsWith("<@!"+client.user.id+">")) {
+            let actualMessage = message.content.split(" ").splice(1).join(" ");
+            let dialogFlowReply = await runSample(process.env.PROJECT_ID,message.author.id,actualMessage);
+            return message.reply(dialogFlowReply);
+        }
+        else{
+            return message.reply("If you wanna talk to me, mention me at start of your message :)");
+        }
     }
     if (message.content.startsWith(COMMAND_PREFIX) == false) {
         //message.reply('If you wanna talk to me, begin with a !');

@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/pranay-thl/discordbot#readme",
   "dependencies": {
+    "dialogflow": "^1.2.0",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "inspirational-quotes": "^1.0.8",
