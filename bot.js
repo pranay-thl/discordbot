@@ -23,28 +23,35 @@ client.on('ready', () => {
 
 async function runSample(projectId, userId, msg) {
     // Create a new session
-    let keyFileName = process.env.KEY_FILE
-    const sessionClient = new dialogflow.SessionsClient({keyFilename:keyFileName});
-    const sessionPath = sessionClient.sessionPath(projectId, userId);
-
-    // The text query request.
-    const request = {
-        session: sessionPath,
-        queryInput: {
-            text: {
-                // The query to send to the dialogflow agent
-                text: msg,
-                // The language used by the client (en-US)
-                languageCode: 'en-US',
+    try{
+        let keyFile = JSON.parse(process.env.DIALOGFLOW_KEY);
+        const sessionClient = new dialogflow.SessionsClient({credentials:keyFile});
+        const sessionPath = sessionClient.sessionPath(projectId, userId);
+    
+        // The text query request.
+        const request = {
+            session: sessionPath,
+            queryInput: {
+                text: {
+                    // The query to send to the dialogflow agent
+                    text: msg,
+                    // The language used by the client (en-US)
+                    languageCode: 'en-US',
+                },
             },
-        },
-    };
-
-    // Send request and log result
-    const responses = await sessionClient.detectIntent(request);
-    const result = responses[0].queryResult;
-    //console.log(`  Response: ${result.fulfillmentText}`);
-    return result.fulfillmentText;
+        };
+    
+        // Send request and log result
+        const responses = await sessionClient.detectIntent(request);
+        const result = responses[0].queryResult;
+        //console.log(`  Response: ${result.fulfillmentText}`);
+        return result.fulfillmentText;
+    }
+    catch(err) {
+        console.log(err);
+        return "Something went wrong with my DialogFlow API, ping Phosphenes."
+    }
+    
 }
 
 function getUserFromMention(mention) {
