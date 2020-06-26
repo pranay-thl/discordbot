@@ -146,7 +146,7 @@ async function commandHandler(message, command, args) {
             return message.channel.send(`${message.author.username}, your avatar: ${message.author.displayAvatarURL({ dynamic: true })}`);
         }
         if (command === "voice") {
-            if (settings.VOICE_SUPPORT === false) {
+            if (process.env.VOICE_SUPPORT === "false") {
                 return await message.channel.send("Sorry, my voice support has been disabled.", { tts: true });
             }
             if (message.member.voice.channel) {
