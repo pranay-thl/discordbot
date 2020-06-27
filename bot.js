@@ -233,6 +233,7 @@ async function commandHandler(message, command, args) {
 }
 
 client.on('message', async message => {
+    message.content = message.content.trim();
     if(sleep) {
         if(message.content.startsWith(COMMAND_PREFIX+"wake") === false){
             return;
@@ -243,7 +244,8 @@ client.on('message', async message => {
         if(profanities.includes(wordSplit[i].toLowerCase()) && profanitiesWhiteList.indexOf(wordSplit[i].toLowerCase()) === -1) {
             await runtime.storage.updateProfanityCount(message.author.id);
             let profCount = await runtime.storage.getProfanityCount(message.author.id);
-            return message.reply("Don't say bad words! This is your Warning Number: "+profCount.data.count);
+            return message.reply("Don't say bad words!);
+            //return message.reply("Don't say bad words! This is your Warning Number: "+profCount.data.count);
         }
     }
     if (message.mentions.has(client.user)) {
