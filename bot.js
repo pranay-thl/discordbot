@@ -86,7 +86,7 @@ async function commandHandler(message, command, args) {
                     { name: COMMAND_PREFIX+'avatar <@mention>', value: 'Gets the avatar of mentioned user' },
                     { name: COMMAND_PREFIX+'skin UserName', value: 'Gets the skin of user' },
                     { name: COMMAND_PREFIX+'nasa <YYYY-MM-DD> <camera>', value: 'Gets the camera image from Curiosity Rover of a'
-                    + 'give date. Both params are optional, default date is today. Cameras are: fhaz (Front Hazard Avoidance Camera), '
+                    + ' given date. Both params are optional, default date is today. Cameras are: fhaz (Front Hazard Avoidance Camera), '
                     +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
                     +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
 
