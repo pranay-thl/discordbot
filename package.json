@@ -26,6 +26,7 @@
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "inspirational-quotes": "^1.0.8",
+    "moment": "^2.27.0",
     "mongodb": "^3.5.9",
     "popular-movie-quotes": "^1.2.4",
     "profanities": "^2.13.0",

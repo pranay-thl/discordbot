@@ -9,8 +9,10 @@ const axios = require('axios');
 
 const profanitiesWhiteList = ["kill","die"];
 
+var api = require("./apis");
 var settings = require("./settings");
 var runtime = require("./runtime");
+const { UV_FS_O_FILEMAP } = require('constants');
 
 var sleep = false;
 const client = new Discord.Client();
@@ -82,6 +84,11 @@ async function commandHandler(message, command, args) {
                     { name: COMMAND_PREFIX+'mquote', value: 'Get a movie Quote' },
                     { name: COMMAND_PREFIX+'speak <text>', value: 'Speaks out the said text' },
                     { name: COMMAND_PREFIX+'avatar <@mention>', value: 'Gets the avatar of mentioned user' },
+                    { name: COMMAND_PREFIX+'skin UserName', value: 'Gets the skin of user' },
+                    { name: COMMAND_PREFIX+'nasa <YYYY-MM-DD> <camera>', value: 'Gets the camera image from Curiosity Rover of a'
+                    + 'give date. Both params are optional, default date is today. Cameras are: fhaz (Front Hazard Avoidance Camera), '
+                    +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
+                    +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
 
                 )
             return await message.channel.send(helpEmbed);
@@ -250,10 +257,22 @@ async function commandHandler(message, command, args) {
                 return message.reply("Whoops something went wrong!")
             }
         }
+        if(command === "nasa") {
+            let nasa_res = await api.nasa.fetchImage(...args);
+            if(nasa_res.error) {
+                return message.reply("No image found, try again with a different camera/date")
+            }
+            const exampleEmbed = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle("Curiosity says hi :)")
+                    .setImage(nasa_res.data)
+            return message.channel.send(exampleEmbed);
+        }
         return message.reply("Whoops I don't know that one yet!")
     }
     catch (e) {
         console.log(e);
+        return message.reply("Whoops something went wrong!")
     }
 }
 
