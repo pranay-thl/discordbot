@@ -5,6 +5,7 @@ const Quote = require('inspirational-quotes');
 const movieQuote = require("popular-movie-quotes");
 const profanities = require('profanities');
 const dialogflow = require('dialogflow');
+const axios = require('axios');
 
 const profanitiesWhiteList = ["kill","die"];
 
@@ -76,11 +77,11 @@ async function commandHandler(message, command, args) {
                 .setTitle('Obstacles')
                 .setDescription('Welcome to the help section!')
                 .addFields(
-                    { name: '!quote', value: 'Get an inspirational Quote' },
-                    { name: '!quote f', value: 'Get an inspirational Quote with Author name' },
-                    { name: '!mquote', value: 'Get a movie Quote' },
-                    { name: '!speak <text>', value: 'Speaks out the said text' },
-                    { name: '!avatar <@mention>', value: 'Gets the avatar of mentioned user' },
+                    { name: COMMAND_PREFIX+'quote', value: 'Get an inspirational Quote' },
+                    { name: COMMAND_PREFIX+'quote f', value: 'Get an inspirational Quote with Author name' },
+                    { name: COMMAND_PREFIX+'mquote', value: 'Get a movie Quote' },
+                    { name: COMMAND_PREFIX+'speak <text>', value: 'Speaks out the said text' },
+                    { name: COMMAND_PREFIX+'avatar <@mention>', value: 'Gets the avatar of mentioned user' },
 
                 )
             return await message.channel.send(helpEmbed);
@@ -223,6 +224,30 @@ async function commandHandler(message, command, args) {
             }
             else{
                 return message.reply("You're not authorized to wake me up!");
+            }
+        }
+        if(command === "skin") {
+            if (args.length === 0) {
+                return message.reply("Please mention the username for fetching skin");
+            }
+            var url = "https://playerdb.co/api/player/minecraft/"+args[0];
+            try{
+                var axRes = await axios.get(url);
+                //console.log(axRes.data);
+                if(!(axRes && axRes.data && axRes.data.code==="player.found")) {
+                    return message.reply("No such user found in Mojang");
+                }
+                var playerid = axRes.data.data.player.id;
+                var playerSkin = "https://crafatar.com/renders/body/"+playerid;
+                const exampleEmbed = new Discord.MessageEmbed()
+                    .setColor('#0099ff')
+                    .setTitle(args[0]+'\'s Skin')
+                    .setImage(playerSkin)
+                return message.channel.send(exampleEmbed);
+            }
+            catch(err) {
+                console.log(err);
+                return message.reply("Whoops something went wrong!")
             }
         }
         return message.reply("Whoops I don't know that one yet!")

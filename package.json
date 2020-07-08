@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/pranay-thl/discordbot#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "dialogflow": "^1.2.0",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
