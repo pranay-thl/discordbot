@@ -1,5 +1,6 @@
 var storage = require("./storage");
-
+var {Logger} = require("./log");
 module.exports = {
-    storage: storage
+    storage,
+    log: Logger
 }

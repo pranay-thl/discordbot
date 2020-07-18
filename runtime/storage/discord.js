@@ -30,7 +30,33 @@ function updateProfanityCount(userId) {
     });
 }
 
+function whitelistWord(word,userId, userName) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("profanityWhileList");
+        col.insertOne({_id:word, insertBy: userId, userName:userName, insertedOn: new Date()},(err,res)=>{
+            if(err) {
+                return reject({err:{msg:err}});
+            }
+            return resolve({});
+        });
+    });
+}
+
+function getWhiteList() {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("profanityWhileList");
+        col.find({}).toArray((err,res)=>{
+            if(err) {
+                return reject({err:{msg:err}});
+            }
+            return resolve(res);
+        });
+    });
+}
+
 module.exports = {
-    getProfanityCount: getProfanityCount,
-    updateProfanityCount: updateProfanityCount
+    getProfanityCount,
+    updateProfanityCount,
+    whitelistWord,
+    getWhiteList
 }

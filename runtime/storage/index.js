@@ -14,5 +14,7 @@ module.exports  = {
     getDb: mongoutils.getDb,
     disconnect: mongoutils.disconnct,
     getProfanityCount: discord.getProfanityCount,
-    updateProfanityCount: discord.updateProfanityCount
+    updateProfanityCount: discord.updateProfanityCount,
+    whitelistWord: discord.whitelistWord,
+    getWhiteList: discord.getWhiteList
 }
