@@ -104,7 +104,7 @@ class Obstacles {
             }
             if (command === 'avatar') {
                 if (args[0]) {
-                    const user = getUserFromMention(args[0]);
+                    const user = this.getUserFromMention(args[0]);
                     if (!user) {
                         return message.reply('Please use a proper mention if you want to see someone else\'s avatar.');
                     }
