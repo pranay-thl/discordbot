@@ -166,7 +166,7 @@ class Obstacles {
             if(command === "sleep") {
                 //TODO : add a generic config for sleep command
                 if(message.guild){
-                    if(message.member.roles.cache.get("707713457713053858")) {
+                    if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
                         this.sleep = true;
                         return message.channel.send("ZzZzZ....");
                     }
@@ -237,8 +237,32 @@ class Obstacles {
                 if(args.length === 0 || args.length >1) {
                     return message.reply("Invalid argument. Please check "+this.prefix+"help for command usages");
                 }
-                await this.runtime.storage.whitelistWord(args[0],message.author.id,message.author.username);
-                return message.channel.send("Word whitelisted");
+                if(message.guild){
+                    if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
+                        if(profanities.indexOf(args[0])!==-1) {
+                            await this.runtime.storage.whitelistWord(args[0],message.author.id,message.author.username);
+                            return message.channel.send("Word whitelisted");
+                        }
+                        else{
+                            return message.channel.send("Word is already whitelisted");
+                        }
+                    }
+                    else{
+                        return message.reply("You're not authorized to whitelist words!");
+                    }
+                }
+                else if(message.author.id === "366182222228619265"){
+                    if(profanities.indexOf(args[0])!==-1) {
+                        await this.runtime.storage.whitelistWord(args[0],message.author.id,message.author.username);
+                        return message.channel.send("Word whitelisted");
+                    }
+                    else{
+                        return message.channel.send("Word is already whitelisted");
+                    }
+                }
+                else{
+                    return message.reply("You're not authorized to whitelist words!");
+                }
             }
             return message.reply("Whoops I don't know that one yet!")
         }
