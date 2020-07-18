@@ -1,11 +1,9 @@
 # discordbot
 A Discord Bot
 
-Note: The Bot requires a working mongodb connection to start
+Note: The Bot requires a working mongodb connection to start and following third party integrations: dialogflow, nasa api key
 Setup:
 
-1. Install libtool: (mac)brew install libtool autoconf automake -- optional
-2. Install ffmpeg: (mac)brew install ffmpeg --optional
-3. npm install
-4. configure the following env variables by creating a .env file with following variables : DISCORD_TOKEN, MONGOURI
-5. node bot.js
+1. npm install
+2. configure the following env variables by creating a .env file with following variables : DISCORD_TOKEN, MONGOURI, PROJECT_ID, DIALOGFLOW_KEY, VOICE_SUPPORT, NASA
+3. node bot.js
