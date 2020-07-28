@@ -3,6 +3,7 @@ const when = require("when");
 var mongoutils = require("./mongoutils");
 var discord = require("./discord");
 var settings = require("../../settings");
+const { getBlackList } = require("./discord");
 
 function init(settings) {
     mongoutils.init(settings);
@@ -16,5 +17,7 @@ module.exports  = {
     getProfanityCount: discord.getProfanityCount,
     updateProfanityCount: discord.updateProfanityCount,
     whitelistWord: discord.whitelistWord,
-    getWhiteList: discord.getWhiteList
+    blacklistWord: discord.blacklistWord,
+    getWhiteList: discord.getWhiteList,
+    getBlackList: discord.getBlackList
 }

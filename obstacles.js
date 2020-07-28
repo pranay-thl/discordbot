@@ -2,9 +2,10 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const Quote = require('inspirational-quotes');
 const movieQuote = require("popular-movie-quotes");
-const profanities = require('profanities');
 const dialogflow = require('dialogflow');
 const axios = require('axios');
+
+var profanities = require('profanities');
 
 class Obstacles {
     constructor(client, serverName, runtime, api) {
@@ -240,7 +241,7 @@ class Obstacles {
                 if(message.guild){
                     if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
                         if(profanities.indexOf(args[0])!==-1) {
-                            await this.runtime.storage.whitelistWord(args[0],message.author.id,message.author.username);
+                            await this.runtime.storage.whitelistWord(args[0].toLowerCase(),message.author.id,message.author.username);
                             return message.channel.send("Word whitelisted");
                         }
                         else{
@@ -253,11 +254,42 @@ class Obstacles {
                 }
                 else if(message.author.id === "366182222228619265"){
                     if(profanities.indexOf(args[0])!==-1) {
-                        await this.runtime.storage.whitelistWord(args[0],message.author.id,message.author.username);
+                        await this.runtime.storage.whitelistWord(args[0].toLowerCase(),message.author.id,message.author.username);
                         return message.channel.send("Word whitelisted");
                     }
                     else{
                         return message.channel.send("Word is already whitelisted");
+                    }
+                }
+                else{
+                    return message.reply("You're not authorized to whitelist words!");
+                }
+            }
+            if(command === "blacklist") {
+                if(args.length === 0 || args.length >1) {
+                    return message.reply("Invalid argument. Please check "+this.prefix+"help for command usages");
+                }
+                if(message.guild){
+                    if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
+                        if(profanities.indexOf(args[0])===-1) {
+                            await this.runtime.storage.blacklistWord(args[0],message.author.id,message.author.username);
+                            return message.channel.send("Word blacklisted");
+                        }
+                        else{
+                            return message.channel.send("Word is already blaclisted");
+                        }
+                    }
+                    else{
+                        return message.reply("You're not authorized to blacklist words!");
+                    }
+                }
+                else if(message.author.id === "366182222228619265"){
+                    if(profanities.indexOf(args[0])===-1) {
+                        await this.runtime.storage.blacklistWord(args[0],message.author.id,message.author.username);
+                        return message.channel.send("Word blacklisted");
+                    }
+                    else{
+                        return message.channel.send("Word is already blacklisted");
                     }
                 }
                 else{
@@ -315,9 +347,15 @@ class Obstacles {
         if(profanitiesWhiteList.length) {
             profanitiesWhiteList=profanitiesWhiteList.map(x=>x._id);
         }
+        let blacklist = await this.runtime.storage.getBlackList();
+        if(blacklist.length) {
+            blacklist=blacklist.map(x=>x._id);
+        }
+        profanities = profanities.concat(blacklist);
+        profanities = profanities.filter(x=>profanitiesWhiteList.includes(x.toLowerCase())===false);
         if(message.content.startsWith(this.prefix+"whitelist") === false){
             for(var i=0;i<wordSplit.length;i++) {
-                if(profanities.includes(wordSplit[i].toLowerCase()) && profanitiesWhiteList.indexOf(wordSplit[i].toLowerCase()) === -1) {
+                if(profanities.includes(wordSplit[i].toLowerCase())) {
                     wordSplit[i] = wordSplit[i].repeat();
                     try{
                         await this.runtime.storage.updateProfanityCount(message.author.id);

@@ -37,10 +37,37 @@ function whitelistWord(word,userId, userName) {
             if(err) {
                 return reject({err:{msg:err}});
             }
-            return resolve({});
+            var col = mongoutils.getDb().collection("profanityBlackList");
+            col.deleteOne({_id:word},(err,res) =>{
+                if(err) {
+                    return reject({err:{msg:err}});
+                }
+                return resolve({});
+            });
         });
     });
 }
+
+
+function blacklistWord(word,userId, userName) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("profanityBlackList");
+        col.insertOne({_id:word, insertBy: userId, userName:userName, insertedOn: new Date()},(err,res)=>{
+            if(err) {
+                return reject({err:{msg:err}});
+            }
+            var col = mongoutils.getDb().collection("profanityWhileList");
+            col.deleteOne({_id:word},(err,res) =>{
+                if(err) {
+                    return reject({err:{msg:err}});
+                }
+                return resolve({});
+            });
+        });
+    });
+}
+
+
 
 function getWhiteList() {
     return when.promise((resolve, reject) => {
@@ -54,9 +81,23 @@ function getWhiteList() {
     });
 }
 
+function getBlackList() {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("profanityBlackList");
+        col.find({}).toArray((err,res)=>{
+            if(err) {
+                return reject({err:{msg:err}});
+            }
+            return resolve(res);
+        });
+    });
+}
+
 module.exports = {
     getProfanityCount,
     updateProfanityCount,
     whitelistWord,
-    getWhiteList
+    blacklistWord,
+    getWhiteList,
+    getBlackList
 }
