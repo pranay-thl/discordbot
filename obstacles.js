@@ -19,6 +19,11 @@ class Obstacles {
         this.sleep = false;
     }
 
+    joinServer(host,port,username,version) {
+        this.MinecraftClient = new this.runtime.client.MinecraftClient(host,port,username,version, this);
+        this.MinecraftClient.connect();
+    }
+
     getUserFromMention(mention) {
         if (!mention) return;
     
@@ -296,6 +301,23 @@ class Obstacles {
                     return message.reply("You're not authorized to whitelist words!");
                 }
             }
+            if(command === "joinServer") {
+                if(message.author.id !== "366182222228619265") {
+                    return message.reply("TheHurtLocker only.");
+                }
+                this.joinServer(process.env.MC_HOST,25565,"Obstacles","1.13.2");
+                return;
+            }
+            if(command === "executeCommand") {
+                if(message.author.id !== "366182222228619265") {
+                    return message.reply("TheHurtLocker only.");
+                }
+                if(args.length === 0) {
+                    return message.reply("Invalid argument. Please check "+this.prefix+"help for command usages");
+                }
+                this.MinecraftClient.executeCommand(args.join(" "));
+                return;
+            }
             return message.reply("Whoops I don't know that one yet!")
         }
         catch (e) {
@@ -391,6 +413,11 @@ class Obstacles {
         let args = split.slice(1);
     
         this.commandHandler(message, command, args);
+    }
+
+    async emitToChannel(message) {
+        //return await this.client.guilds.cache.get("723230380228083772").channels.cache.get("723230380228083775").send(message);
+        return await this.client.guilds.cache.get("705797413788581919").channels.cache.get("726453572669014118").send(message);
     }
     
 }
