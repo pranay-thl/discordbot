@@ -4,8 +4,10 @@ const Quote = require('inspirational-quotes');
 const movieQuote = require("popular-movie-quotes");
 const dialogflow = require('dialogflow');
 const axios = require('axios');
+const io = require('socket.io-client');
 
 var profanities = require('profanities');
+const { Timestamp } = require('mongodb');
 
 class Obstacles {
     constructor(client, serverName, runtime, api) {
@@ -17,6 +19,8 @@ class Obstacles {
         this.api = api;
         this.profanitiesWhiteList = [];
         this.sleep = false;
+        this.socket = null;
+        this.connectSocketServer()
     }
 
     joinServer(host,port,username,version) {
@@ -359,8 +363,29 @@ class Obstacles {
         
     }
 
+    async connectSocketServer() {
+        if(this.serverName !== "Vanguard") {
+            return;
+        }
+        this.socket = io.connect(process.env.SOCKET_URL);
+        this.socket.on("message", (msgObj)=>{
+            this.client.guilds.cache.get("705797413788581919").channels.cache.get("738675322567917640").send("["+msgObj.username+"]: "+msgObj.message);
+        })
+        // this.socket.on('connect_error',(err)=>{
+        //     console.log(err);
+        // })
+    }
+
     async messageHandler(message) {
         message.content = message.content.trim();
+        if(this.socket && this.socket.connected) {
+            if(!(message.author.id==="723229089502199829" && message.content.startsWith("[User") === true)) {
+                this.socket.emit('message',"["+message.channel.name+"] "+message.author.username+": "+message.content);   
+            }
+        }
+        if(message.channel.id === "738675322567917640") {
+            return;
+        }
         if(this.sleep && message.content.startsWith(this.prefix+"wake") === false){
             return;
         }
