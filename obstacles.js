@@ -380,7 +380,7 @@ class Obstacles {
         message.content = message.content.trim();
         if(this.socket && this.socket.connected) {
             if(!(message.author.id==="723229089502199829" && message.content.startsWith("[") === true)) {
-                this.socket.emit('message',"["+message.channel.name+"] "+message.content);   
+                this.socket.emit('message',"["+message.channel.name+"] "+message.author.username+": "+message.content);   
             }
         }
         if(message.channel.id === "738675322567917640") {
