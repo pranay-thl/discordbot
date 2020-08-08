@@ -322,6 +322,37 @@ class Obstacles {
                 this.MinecraftClient.executeCommand(args.join(" "));
                 return;
             }
+            if(command === "startTalk") {
+                if(message.guild) {
+                    if(!(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265")){
+                        return message.reply("You're not authorized!");
+                    }
+                }
+                else{
+                    if(message.author.id !== "366182222228619265") {
+                        return message.reply("TheHurtLocker only.");
+                    }   
+                }
+                if(args.length === 0) {
+                    return message.reply("Invalid argument. Please check "+this.prefix+"help for command usages");
+                }
+                this.selfTalk = true;
+                return message.channel.send(args.join(" "));
+            }
+            if(command === "stopTalk") {
+                if(message.guild) {
+                    if(!(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265")){
+                        return message.reply("You're not authorized!");
+                    }
+                }
+                else{
+                    if(message.author.id !== "366182222228619265") {
+                        return message.reply("TheHurtLocker only.");
+                    }   
+                }
+                this.selfTalk = false;
+                return message.channel.send("Stopped parsing self messages.");
+            }
             return message.reply("Whoops I don't know that one yet!")
         }
         catch (e) {
@@ -417,9 +448,12 @@ class Obstacles {
                 }
             }
         }
-        if (message.mentions.has(this.client.user)) {
+        if (message.mentions.has(this.client.user) && message.content.startsWith(this.prefix+"startTalk") === false) {
             //dialogflow
-            if(message.content.startsWith("<@!"+this.client.user.id+">")) {
+            if(this.selfTalk === false && message.author.id === this.client.user.id) {
+                return;
+            }
+            if(message.content.startsWith("<@!"+this.client.user.id+">") || message.content.startsWith("<@"+this.client.user.id+">")) {
                 let actualMessage = message.content.split(" ").splice(1).join(" ");
                 let dialogFlowReply = await this.runDialogFlow(process.env.PROJECT_ID,message.author.id,actualMessage);
                 return message.reply(dialogFlowReply);
