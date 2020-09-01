@@ -46,7 +46,7 @@ class Obstacles {
         if (todoList.length === 0) {
             return "Nothing here, try adding an item to your list!"
         }
-        return username + "'s To-Do List:\n" + todoList.map((i) => `${todoList.indexOf(i) + 1}. ${i}`).join("\n")
+        return "Your To-Do List:\n" + todoList.map((i) => `${todoList.indexOf(i) + 1}. ${i}`).join("\n")
         // let embed = new Discord.MessageEmbed()
         //     .setColor('RANDOM')
         //     .setTitle(username+"'s To-Do List");
