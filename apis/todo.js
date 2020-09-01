@@ -1,4 +1,5 @@
 const when = require("when");
+const { todo } = require(".");
 
 var storage;
 function init(_runtime) {
@@ -9,7 +10,12 @@ function getToDoList(userId) {
     return when.promise(async (resolve, reject) => {
         try {
             let todolist = await storage.getToDoList(userId);
-            return resolve(todolist.data.list);
+            if(!todolist.data) {
+                return resolve([]);
+            }
+            else{
+                return resolve(todolist.data.list);
+            }
         }
         catch (err) {
             return reject(err);
