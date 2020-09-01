@@ -42,6 +42,24 @@ class Obstacles {
         }
     }
 
+    createToDoListResponse(username, todoList) {
+        if (todoList.length === 0) {
+            return "Nothing here, try adding an item to your list!"
+        }
+        return username + "'s To-Do List:\n" + todoList.map((i) => `${todoList.indexOf(i) + 1}. ${i}`).join("\n")
+        // let embed = new Discord.MessageEmbed()
+        //     .setColor('RANDOM')
+        //     .setTitle(username+"'s To-Do List");
+        // if(todoList.length === 0) {
+        //     embed.addField("Nothing here, try adding an item to your list");
+        // } 
+        // todoList.forEach(element => {
+        //     embed.addField(element);
+        // });
+        // embed.setTimestamp()
+        // return embed;
+    }
+
     async commandHandler(message, command, args) {
         try {
             if (command === "help" || command === "h") {
@@ -64,6 +82,7 @@ class Obstacles {
                         + ' given date. Both params are optional, default date is today. Cameras are: fhaz (Front Hazard Avoidance Camera), '
                         +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
+                        { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -352,6 +371,31 @@ class Obstacles {
                 }
                 this.selfTalk = false;
                 return message.channel.send("Stopped parsing self messages.");
+            }
+            if (command === "todo") {
+                let todolist = await this.api.todo.getToDoList(message.author.id);
+                if (args.length === 0) {
+                    return message.reply(this.createToDoListResponse(message.author.username,todolist));
+                }
+                else if (args[0] === "add") {
+                    if (args.length < 2) {
+                        return message.reply("Please specify an item to be added");
+                    }
+                    await this.api.todo.addToDoList(message.author.id, args.slice(1).join(" "));
+                    todolist = await this.api.todo.getToDoList(message.author.id);
+                    await message.reply("Item added to your To-Do List");
+                    return message.reply(this.createToDoListResponse(message.author.username,todolist));
+                }
+                else if (args[0] === "pop") {
+                    await this.api.todo.popToDoList(message.author.id);
+                    todolist = await this.api.todo.getToDoList(message.author.id);
+                    await message.reply("Item removed from your To-Do List");
+                    return message.reply(this.createToDoListResponse(message.author.username,todolist));
+
+                }
+                else{
+                    return message.reply("Invalid arguments. Refer help section");
+                }
             }
             return message.reply("Whoops I don't know that one yet!")
         }

@@ -19,5 +19,8 @@ module.exports  = {
     whitelistWord: discord.whitelistWord,
     blacklistWord: discord.blacklistWord,
     getWhiteList: discord.getWhiteList,
-    getBlackList: discord.getBlackList
+    getBlackList: discord.getBlackList,
+    getToDoList: discord.getToDoList,
+    addToDoList: discord.addToDoList,
+    popToDoList: discord.popToDoList
 }

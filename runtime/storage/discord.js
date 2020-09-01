@@ -1,5 +1,6 @@
 var mongoutils = require("./mongoutils");
 const when = require("when");
+const { resolve, reject } = require("when");
 
 
 //Profanity Counter
@@ -93,11 +94,47 @@ function getBlackList() {
     });
 }
 
+function getToDoList(userId) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("todolist");
+        col.findOne({ '_id': userId }).then((res) => {
+            return resolve({ data: res });
+        }).catch((err) => {
+            return reject({ err: { msg: err } });
+        })
+    });
+}
+
+function addToDoList(userId, msg) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("todolist");
+        col.updateOne({ '_id': userId }, { "$push": { "list": msg }, }, { upsert: true }).then((res) => {
+            return resolve({});
+        }).catch((err) => {
+            return reject({ err: { msg: err } });
+        })
+    });
+}
+
+function popToDoList(userId) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("todolist");
+        col.updateOne({ '_id': userId }, { "$pop": { "list": 1 } }).then((res) => {
+            return resolve({});
+        }).catch((err) => {
+            return reject({ err: { msg: err } });
+        })
+    });
+}
+
 module.exports = {
     getProfanityCount,
     updateProfanityCount,
     whitelistWord,
     blacklistWord,
     getWhiteList,
-    getBlackList
+    getBlackList,
+    getToDoList,
+    addToDoList,
+    popToDoList
 }

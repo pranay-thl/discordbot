@@ -55,6 +55,7 @@ client.on('guildMemberAdd', member => {
 
 runtime.storage.init(settings);
 runtime.storage.connect().then(()=>{
+    api.init(runtime);
     client.login(process.env.DISCORD_TOKEN);
 }).otherwise((err)=>{
     console.log(err);
