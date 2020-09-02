@@ -119,7 +119,7 @@ function addToDoList(userId, msg) {
 function popToDoList(userId) {
     return when.promise((resolve, reject) => {
         var col = mongoutils.getDb().collection("todolist");
-        col.updateOne({ '_id': userId }, { "$pop": { "list": 1 } }).then((res) => {
+        col.updateOne({ '_id': userId }, { "$pop": { "list": -1 } }).then((res) => {
             return resolve({});
         }).catch((err) => {
             return reject({ err: { msg: err } });
