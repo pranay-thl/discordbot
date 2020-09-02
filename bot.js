@@ -50,7 +50,9 @@ client.on('guildMemberAdd', member => {
         //for custom channels
         channel = member.guild.channels.cache.find(ch => ch.name === 'faction');
     };
-    channel.send(`Welcome to the server, ${member}!`);
+    if(channel) {
+        channel.send(`Welcome to the server, ${member}!`);
+    }
 });
 
 runtime.storage.init(settings);
