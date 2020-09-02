@@ -83,6 +83,7 @@ class Obstacles {
                         +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
+                        { name: this.prefix+'chucknorris/chuck', value: 'Chuck Norris!' },
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -176,7 +177,6 @@ class Obstacles {
                             .setAuthor(currQuote.author)
                             .setDescription(currQuote.text)
                             .setTimestamp()
-                            .setFooter('Copyright Obstacles 2020-21');
                         return await message.channel.send(quoteEmbed);
                     }
                 }
@@ -189,7 +189,6 @@ class Obstacles {
                     .setAuthor(currQuote.movie + " (" + currQuote.year + ")")
                     .setDescription(currQuote.quote)
                     .setTimestamp()
-                    .setFooter('Copyright Obstacles 2020-21');
                 return await message.channel.send(quoteEmbed);
             }
             if(command === "sleep") {
@@ -396,6 +395,15 @@ class Obstacles {
                 else{
                     return message.reply("Invalid arguments. Refer help section");
                 }
+            }
+            if(command === "chucknorris" || command === "chuck") {
+                let chuck_res = await this.api.chuck.fetchJoke();
+                var quoteEmbed = new Discord.MessageEmbed()
+                    .setColor('RANDOM')
+                    .setAuthor("Chuck Norris")
+                    .setDescription(chuck_res.data)
+                    .setTimestamp()
+                return await message.channel.send(quoteEmbed);
             }
             return message.reply("Whoops I don't know that one yet!")
         }
