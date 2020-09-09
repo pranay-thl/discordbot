@@ -7,7 +7,6 @@ const axios = require('axios');
 const io = require('socket.io-client');
 
 var profanities = require('profanities');
-const { Timestamp } = require('mongodb');
 
 class Obstacles {
     constructor(client, serverName, runtime, api) {
@@ -83,7 +82,7 @@ class Obstacles {
                         +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
-                        { name: this.prefix+'chucknorris/chuck', value: 'Chuck Norris!' },
+                        { name: this.prefix+'math <expression>', value: 'Solves your math homework :p' },
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -404,6 +403,18 @@ class Obstacles {
                     .setDescription(chuck_res.data)
                     .setTimestamp()
                 return await message.channel.send(quoteEmbed);
+            }
+            if(command === "math") {
+                if(args.length === 0) {
+                    return message.reply("Please provide a valid Math expression!");
+                }
+                let mathRes = await this.api.math.evaluateExpression(args.join(" "));
+                if(mathRes.data) {
+                    return message.channel.send(mathRes.data.toString());
+                }
+                else{
+                    return message.channel.send(mathRes.error.msg);
+                }
             }
             return message.reply("Whoops I don't know that one yet!")
         }

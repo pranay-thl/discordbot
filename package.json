@@ -26,6 +26,7 @@
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "inspirational-quotes": "^1.0.8",
+    "mathjs": "^7.2.0",
     "minecraft-protocol": "^1.13.0",
     "moment": "^2.27.0",
     "mongodb": "^3.5.9",
