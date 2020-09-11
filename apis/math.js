@@ -1,6 +1,5 @@
 const when = require("when");
 const math = require("mathjs");
-const { resolve, reject } = require("when");
 
 var runtime;
 function init(_runtime) {
@@ -14,7 +13,11 @@ function evaluateExpression(expr) {
             return resolve({ data: evalRes });
         }
         catch (err) {
-            return resolve({ error: { data: err, msg: err.message } });
+            let err_msg = "Internal Server Error";
+            if(err && err.message) {
+                err_msg = err.message;
+            }
+            return resolve({ error: { data: err, msg: err_msg} });
         }
     });
 }
