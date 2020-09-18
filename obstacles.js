@@ -208,7 +208,7 @@ class Obstacles {
             }
             if(command === "wake") {
                 if(message.guild) {
-                    if(message.member.roles.cache.get("707713457713053858")) {
+                    if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
                         this.sleep = false;
                         return message.channel.send("Rise and Shine !");
                     }
