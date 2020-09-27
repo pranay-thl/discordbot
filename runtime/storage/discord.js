@@ -127,6 +127,42 @@ function popToDoList(userId) {
     });
 }
 
+function createPlayList(playlistName, userId) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("playlist");
+        col.insertOne({'_id': playlistName, 'createdBy': userId , 'songs': []}).then((res) => {
+            return resolve({}); 
+        }).catch((err) => {
+            return reject({err: {msg: err}});
+        });
+    });
+}
+
+function addToPlaylist(playlistName, songName, userId) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("playlist");
+        col.updateOne({'_id': playlistName, 'createdBy': userId},{ '$push': { 'songs': songName }}).then((res) => {
+            if(res.matchedCount === 0) {
+                return reject({err: {msg: "No such playlist found"}});
+            }
+            return resolve({data: res}); 
+        }).catch((err) => {
+            return reject({err: {msg: err}});
+        });
+    });
+}
+
+function fetchPlaylist(playlistName) {
+    return when.promise((resolve, reject) => {
+        var col = mongoutils.getDb().collection("playlist");
+        col.findOne({ '_id': playlistName }).then((res) => {
+            return resolve({ data: res });
+        }).catch((err) => {
+            return reject({ err: { msg: err } });
+        })
+    });
+}
+
 module.exports = {
     getProfanityCount,
     updateProfanityCount,
@@ -136,5 +172,8 @@ module.exports = {
     getBlackList,
     getToDoList,
     addToDoList,
-    popToDoList
+    popToDoList,
+    createPlayList,
+    addToPlaylist,
+    fetchPlaylist
 }

@@ -22,5 +22,8 @@ module.exports  = {
     getBlackList: discord.getBlackList,
     getToDoList: discord.getToDoList,
     addToDoList: discord.addToDoList,
-    popToDoList: discord.popToDoList
+    popToDoList: discord.popToDoList,
+    createPlayList: discord.createPlayList,
+    addToPlaylist: discord.addToPlaylist,
+    fetchPlaylist: discord.fetchPlaylist
 }

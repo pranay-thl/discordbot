@@ -1,5 +1,4 @@
 const when = require("when");
-const { todo } = require(".");
 
 var storage;
 function init(_runtime) {

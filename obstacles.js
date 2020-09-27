@@ -19,6 +19,7 @@ class Obstacles {
         this.profanitiesWhiteList = [];
         this.sleep = false;
         this.socket = null;
+        this.voiceConnection = null;
         this.connectSocketServer()
     }
 
@@ -59,6 +60,12 @@ class Obstacles {
         // return embed;
     }
 
+    async recurPlaySongs(songList, channel) {
+        for(let i=0;i<songList.length;i++) {
+            await channel.send("!p "+songList[i]);
+        }
+    }
+
     async commandHandler(message, command, args) {
         try {
             if (command === "help" || command === "h") {
@@ -83,6 +90,7 @@ class Obstacles {
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
                         { name: this.prefix+'math <expression>', value: 'Solves your math homework :p' },
+                        { name: this.prefix+'playlist <create/add/view/play(wip)> <playlistname> <song>', value: 'Keep your playlist here!' }
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -155,8 +163,8 @@ class Obstacles {
                 }
             }
             if (command === "mute") {
-                if (voiceConnection) {
-                    return await voiceConnection.disconnect();
+                if (this.voiceConnection) {
+                    return await this.voiceConnection.disconnect();
                 }
                 return;
             }
@@ -414,6 +422,57 @@ class Obstacles {
                 }
                 else{
                     return message.channel.send(mathRes.error.msg);
+                }
+            }
+            if(command === "playlist") {
+                if(args.length === 0) {
+                    return message.reply("Invalid input, Refer to help section for usages");
+                }
+                if(args[0] === "create") {
+                    if(args.length !== 2) {
+                        return message.reply("Please provide a valid playlist name");
+                    }
+                    let playRes = await this.api.playlist.createPlayList(args[1], message.author.id);
+                    return message.channel.send("Playlist : " + args[1] + " Created");
+                }
+                if(args[0] === "add") {
+                    if(args.length < 3) {
+                        return message.reply("Invalid input, Refer to help section for usages");
+                    }
+                    let playRes = await this.api.playlist.addToPlaylist(args[1], args.slice(2).join(" "), message.author.id);
+                    return message.channel.send("Song : " + args.slice(2).join(" ") + " added to playlist : " + args[1]);
+                }
+                if(args[0] === "view") {
+                    if(args.length !== 2) {
+                        return message.reply("Invalid input, Refer to help section for usages");
+                    }
+                    let playRes = await this.api.playlist.fetchPlaylist(args[1]);
+                    if(playRes.data && playRes.data.songs) {
+                        let songList = playRes.data.songs;
+                        return message.channel.send("Songs in "+args[1]+" : "+songList.length+"\n" + songList.map((i) => `${songList.indexOf(i) + 1}. ${i}`).join("\n"));
+                    }
+                    else{
+                        return message.channel.send("No such playlist Found!");
+                    }
+                }
+                if(args[0] === "play") {
+                    if(args.length !== 2) {
+                        return message.reply("Invalid input, Refer to help section for usages");
+                    }
+                    let playRes = await this.api.playlist.fetchPlaylist(args[1]);
+                    if(playRes.data && playRes.data.songs) {
+                        let songList = playRes.data.songs;
+                        if (message.member.voice.channel) {
+                            this.voiceConnection = await message.member.voice.channel.join();
+                            return this.recurPlaySongs(songList, message.channel);
+                        }
+                        else {
+                            return message.reply("You're not in a voice channel.");
+                        }
+                    }
+                    else{
+                        return message.channel.send("No such playlist Found!");
+                    }
                 }
             }
             return message.reply("Whoops I don't know that one yet!")
