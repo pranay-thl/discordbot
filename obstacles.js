@@ -566,6 +566,10 @@ class Obstacles {
     }
 
     async messageHandler(message) {
+        if (message.author.bot) {
+            //note this will disable self talk.
+            return;
+        }
         message.content = message.content.trim();
         if(this.socket && this.socket.connected) {
             if(!(message.author.id==="723229089502199829" && message.content.startsWith("[") === true)) {
