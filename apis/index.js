@@ -3,7 +3,7 @@ var todo = require("./todo");
 var chuck = require("./chucknorris");
 var math = require("./math");
 var playlist = require("./playlist");
-
+var music = require("./music");
 function init(_runtime) {
     todo.init(_runtime);
     playlist.init(_runtime);
@@ -15,5 +15,6 @@ module.exports = {
     todo,
     chuck,
     math,
-    playlist
+    playlist,
+    music
 }

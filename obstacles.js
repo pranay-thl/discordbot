@@ -19,7 +19,14 @@ class Obstacles {
         this.profanitiesWhiteList = [];
         this.sleep = false;
         this.socket = null;
-        this.voiceConnection = null;
+        this.queue = {
+            textChannel : null,
+            voiceChannel : null,
+            connection : null,
+            songs : [],
+            volumne : 5,
+            playing: false
+        }
         this.connectSocketServer()
     }
 
@@ -162,12 +169,12 @@ class Obstacles {
                     return message.reply("You're not in a voice channel.");
                 }
             }
-            if (command === "mute") {
-                if (this.voiceConnection) {
-                    return await this.voiceConnection.disconnect();
-                }
-                return;
-            }
+            // if (command === "mute") {
+            //     if (this.voiceConnection) {
+            //         return await this.voiceConnection.disconnect();
+            //     }
+            //     return;
+            // }
             if (command === "speak") {
                 return await message.channel.send(args, { tts: true });
             }
@@ -463,7 +470,7 @@ class Obstacles {
                     if(playRes.data && playRes.data.songs) {
                         let songList = playRes.data.songs;
                         if (message.member.voice.channel) {
-                            this.voiceConnection = await message.member.voice.channel.join();
+                            //this.voiceConnection = await message.member.voice.channel.join();
                             return this.recurPlaySongs(songList, message.channel);
                         }
                         else {
@@ -474,6 +481,18 @@ class Obstacles {
                         return message.channel.send("No such playlist Found!");
                     }
                 }
+            }
+            if(command === "play") {
+                if(args.length === 0) {
+                    return message.reply("Invalid input, Refer to help section for usages");
+                }
+                return this.api.music.play(message,this.queue,args.join(" "));
+            }
+            if(command === "skip") {
+                return this.api.music.skip(message,this.queue);
+            }
+            if(command === "stop") {
+                return this.api.music.stop(message, this.queue);
             }
             return message.reply("Whoops I don't know that one yet!")
         }
@@ -584,7 +603,7 @@ class Obstacles {
                 return message.reply("If you wanna talk to me, mention me at start of your message :)");
             }
         }
-        if (message.content.startsWith(this.prefix) == false) {
+        if (message.content.startsWith(this.prefix) == false || message.author.bot) {
             return;
         }
     
