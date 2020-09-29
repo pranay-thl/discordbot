@@ -55,7 +55,7 @@ async function playHelper(queue, song) {
     //queue.textChannel.send(`Now Playing: **${song.title}**`);
 }
 
-async function play(message, queue, songName) {
+async function play(message, queue, songName, silentMode = false) {
     try {
         let voiceChannel = message.member.voice.channel;
         if (!voiceChannel) {
@@ -87,23 +87,34 @@ async function play(message, queue, songName) {
         }
         try {
             if (!queue.playing) {
-                message.channel.send(`${song.title} has been added to the queue!`);
+                if(!silentMode) {
+                    message.channel.send(`${song.title} has been added to the queue!`);
+                }
                 playHelper(queue, song);
             }
             else {
-                message.channel.send(`${song.title} has been added to the queue!`);
-                return currQueue(message, queue);
+                if(!silentMode) {
+                    message.channel.send(`${song.title} has been added to the queue!`);
+                    return currQueue(message, queue);
+                }
+                return;
             }
         }
         catch (err) {
             console.log(err);
-            return message.channel.send("Error while playing music!");
+            if(!silentMode){
+                return message.channel.send("Error while playing music!");
+            }
+            return;
         }
 
     }
     catch (err) {
         console.log(err);
-        return message.channel.send("Unexpected Error while adding song to queue.");
+        if(!silentMode) {
+            return message.channel.send("Unexpected Error while adding song to queue.");
+        }
+        return;
     }
 }
 

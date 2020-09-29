@@ -78,7 +78,7 @@ class Obstacles {
 
     async recurPlaySongs(message,songList) {
         for(let i=0;i<songList.length;i++) {
-            await this.api.music.play(message,this.queue,songList[i]);
+            await this.api.music.play(message,this.queue,songList[i],true);
             await this.waitNms(1000);
         }
     }
@@ -481,7 +481,8 @@ class Obstacles {
                     if(playRes.data && playRes.data.songs) {
                         let songList = playRes.data.songs;
                         if (message.member.voice.channel) {
-                            return this.recurPlaySongs(message,songList);
+                            this.recurPlaySongs(message,songList);
+                            return message.channel.send(`Playlist ${args[1]} queued.`);
                         }
                         else {
                             return message.reply("You're not in a voice channel.");
