@@ -5,6 +5,7 @@ const movieQuote = require("popular-movie-quotes");
 const dialogflow = require('dialogflow');
 const axios = require('axios');
 const io = require('socket.io-client');
+const when = require('when');
 
 var profanities = require('profanities');
 
@@ -67,9 +68,18 @@ class Obstacles {
         // return embed;
     }
 
+    waitNms(n) {
+        return when.promise((resolve, reject) => {
+            setTimeout(() => {
+                return resolve();
+            }, n); 
+        }) 
+    }
+
     async recurPlaySongs(message,songList) {
         for(let i=0;i<songList.length;i++) {
             await this.api.music.play(message,this.queue,songList[i]);
+            await this.waitNms(1000);
         }
     }
 
