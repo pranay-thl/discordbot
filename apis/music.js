@@ -13,6 +13,7 @@ async function playHelper(queue, song) {
         queue.playing = false;
         return;
     }
+    queue.playing = true;
     let dispatcher = queue.connection.play(ytdl(song.url))
         .on("finish", () => {
             queue.songs.shift();
@@ -52,7 +53,8 @@ async function play(message, queue, songName) {
                 playHelper(queue, song);
             }
             else {
-                return message.channel.send(`${song.title} has been added to the queue!`);
+                message.channel.send(`${song.title} has been added to the queue!`);
+                return currQueue(message,queue);
             }
         }
         catch (err) {
@@ -83,13 +85,31 @@ function stop(message, queue) {
     }
     queue.songs = [];
     queue.playing = false;
-    queue.connection.dispatcher.end();
-    queue.voiceChannel.leave();
+    if(queue.connection) {
+        queue.connection.dispatcher.end();
+    }
+    if(queue.voiceChannel) {
+        queue.voiceChannel.leave();   
+    }
+}
+
+function currQueue(message, queue) {
+    let songList = queue.songs.map(s=>s.title);
+    return message.channel.send("Current Queue : "+songList.length+"\n" + songList.map((i) => `${songList.indexOf(i) + 1}. ${i}`).join("\n"));
+}
+
+function nowPlaying(message, queue) {
+    if(queue.playing === false) {
+        return message.channel.send("Nothing is playing.");
+    }
+    return message.channel.send(`Now Playing: **${queue.songs[0].title}**`)
 }
 
 module.exports = {
     init,
     play,
     skip,
-    stop
+    stop,
+    currQueue,
+    nowPlaying
 }

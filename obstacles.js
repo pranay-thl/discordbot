@@ -97,7 +97,8 @@ class Obstacles {
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
                         { name: this.prefix+'math <expression>', value: 'Solves your math homework :p' },
-                        { name: this.prefix+'playlist <create/add/view/play(wip)> <playlistname> <song>', value: 'Keep your playlist here!' }
+                        { name: this.prefix+'playlist <create/add/view/play(wip)> <playlistname> <song>', value: 'Keep your playlist here!' },
+                        { name: this.prefix+'play <youtube url>', value: 'Music commands: play, skip, stop, queue(q), nowplaying(np)' },
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -493,6 +494,12 @@ class Obstacles {
             }
             if(command === "stop") {
                 return this.api.music.stop(message, this.queue);
+            }
+            if(command === "queue" || command === "q") {
+                return this.api.music.currQueue(message, this.queue);
+            }
+            if(command === "np" || command === "nowplaying") {
+                return this.api.music.nowPlaying(message, this.queue);
             }
             return message.reply("Whoops I don't know that one yet!")
         }
