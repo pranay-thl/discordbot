@@ -31,6 +31,7 @@ async function playHelper(queue, song) {
         .on("start", () => {
             const videoEmbed = new Discord.MessageEmbed()
                 .setThumbnail(song.thumbnail)
+                .setAuthor(" ")
                 .setColor('RANDOM')
                 .addField('Now Playing', `${song.title}\n ${song.url}`)
                 .addField('Duration', song.duration)
