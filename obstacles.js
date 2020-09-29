@@ -25,7 +25,7 @@ class Obstacles {
             connection : null,
             songs : [],
             volumne : 5,
-            playing: false
+            playing: null
         }
         this.connectSocketServer()
     }
@@ -67,9 +67,9 @@ class Obstacles {
         // return embed;
     }
 
-    async recurPlaySongs(songList, channel) {
+    async recurPlaySongs(message,songList) {
         for(let i=0;i<songList.length;i++) {
-            await channel.send("!p "+songList[i]);
+            await this.api.music.play(message,this.queue,songList[i]);
         }
     }
 
@@ -97,7 +97,7 @@ class Obstacles {
                         +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
                         { name: this.prefix+'math <expression>', value: 'Solves your math homework :p' },
-                        { name: this.prefix+'playlist <create/add/view/play(wip)> <playlistname> <song>', value: 'Keep your playlist here!' },
+                        { name: this.prefix+'playlist <create/add/view/play> <playlistname> <song>', value: 'Keep your playlist here!' },
                         { name: this.prefix+'play <youtube url>', value: 'Music commands: play, skip, stop, queue(q), nowplaying(np)' },
     
                     )
@@ -471,8 +471,7 @@ class Obstacles {
                     if(playRes.data && playRes.data.songs) {
                         let songList = playRes.data.songs;
                         if (message.member.voice.channel) {
-                            //this.voiceConnection = await message.member.voice.channel.join();
-                            return this.recurPlaySongs(songList, message.channel);
+                            return this.recurPlaySongs(message,songList);
                         }
                         else {
                             return message.reply("You're not in a voice channel.");
@@ -483,7 +482,7 @@ class Obstacles {
                     }
                 }
             }
-            if(command === "play") {
+            if(command === "play" || command === "p") {
                 if(args.length === 0) {
                     return message.reply("Invalid input, Refer to help section for usages");
                 }
