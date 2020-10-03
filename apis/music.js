@@ -41,10 +41,16 @@ async function playHelper(queue, song) {
             queue.songs.shift();
         })
         .on("finish", () => {
+            queue.rawDuration -= parseInt(queue.playing.rawDuration);
+            queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
             if(queue.loop) {
+                queue.rawDuration += parseInt(queue.playing.rawDuration);
+                queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
                 queue.songs.unshift(queue.playing);
             }
             if(!queue.loop && queue.loopQueue) {
+                queue.rawDuration += parseInt(queue.playing.rawDuration);
+                queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
                 queue.songs.push(queue.playing);
             }
             playHelper(queue, queue.songs[0]);
@@ -52,6 +58,8 @@ async function playHelper(queue, song) {
         .on("error", (err) => {
             console.log(err);
             queue.textChannel.send('<@366182222228619265> I crashed while playing a song!');
+            queue.rawDuration -= parseInt(queue.playing.rawDuration);
+            queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
             playHelper(queue, queue.songs[0]);
         })
     //dispatcher.setVolumeLogarithmic(queue.volume / 5);
