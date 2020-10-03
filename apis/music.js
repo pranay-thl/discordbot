@@ -8,7 +8,17 @@ function init(_runtime) {
     storage = _runtime.storage;
 }
 
-function resetQueue(queue) {
+async function resetQueue(queue) {
+    if (queue.connection) {
+        if (queue.connection.dispatcher) {
+            await queue.connection.dispatcher.end();
+        }
+        queue.connection = null;
+    }
+    if (queue.voiceChannel) {
+        await queue.voiceChannel.leave();
+        queue.voiceChannel = null;
+    }
     queue.playing = null;
     queue.songs = [];
     queue.textChannel = null;
@@ -16,16 +26,6 @@ function resetQueue(queue) {
     queue.duration = "00:00:00";
     queue.loop = false;
     queue.loopQueue = false;
-    if (queue.connection) {
-        if (queue.connection.dispatcher) {
-            queue.connection.dispatcher.end();
-        }
-        queue.connection = null;
-    }
-    if (queue.voiceChannel) {
-        queue.voiceChannel.leave();
-        queue.voiceChannel = null;
-    }
 }
 
 async function playHelper(queue, song) {
@@ -41,19 +41,21 @@ async function playHelper(queue, song) {
             queue.songs.shift();
         })
         .on("finish", () => {
-            queue.rawDuration -= parseInt(queue.playing.rawDuration);
-            queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
-            if(queue.loop) {
-                queue.rawDuration += parseInt(queue.playing.rawDuration);
+            if (queue.playing) {
+                queue.rawDuration -= parseInt(queue.playing.rawDuration);
                 queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
-                queue.songs.unshift(queue.playing);
+                if (queue.loop) {
+                    queue.rawDuration += parseInt(queue.playing.rawDuration);
+                    queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
+                    queue.songs.unshift(queue.playing);
+                }
+                if (!queue.loop && queue.loopQueue) {
+                    queue.rawDuration += parseInt(queue.playing.rawDuration);
+                    queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
+                    queue.songs.push(queue.playing);
+                }
+                playHelper(queue, queue.songs[0]);
             }
-            if(!queue.loop && queue.loopQueue) {
-                queue.rawDuration += parseInt(queue.playing.rawDuration);
-                queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
-                queue.songs.push(queue.playing);
-            }
-            playHelper(queue, queue.songs[0]);
         })
         .on("error", (err) => {
             console.log(err);
@@ -140,8 +142,6 @@ function skip(message, queue) {
         return message.channel.send("Nothing to skip!");
     }
     if (queue.connection.dispatcher) {
-        queue.rawDuration -= parseInt(queue.playing.rawDuration);
-        queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
         queue.connection.dispatcher.end();
         return message.channel.send("Skipping....");
     }
@@ -269,13 +269,13 @@ function remove(message, queue, songNumber) {
     if (!queue.playing) {
         return message.channel.send("Nothing is playing!");
     }
-    if(!(Number.isInteger(songNumber) && songNumber>0)) {
+    if (!(Number.isInteger(songNumber) && songNumber > 0)) {
         return message.channel.send("Provide a valid number!");
     }
-    if(songNumber > queue.songs.length) {
+    if (songNumber > queue.songs.length) {
         return message.channel.send("Specify a number less than queue length");
     }
-    let removeSong = queue.songs[songNumber-1];
+    let removeSong = queue.songs[songNumber - 1];
     queue.songs.splice(songNumber - 1, 1);
     queue.rawDuration -= parseInt(removeSong.rawDuration);
     queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
