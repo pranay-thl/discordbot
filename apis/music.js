@@ -8,42 +8,45 @@ function init(_runtime) {
     storage = _runtime.storage;
 }
 
+function resetQueue(queue) {
+    queue.playing = null;
+    queue.songs = [];
+    queue.textChannel = null;
+    queue.rawDuration = 0;
+    queue.duration = "00:00:00";
+    queue.loop = false;
+    queue.loopQueue = false;
+    if (queue.connection) {
+        if (queue.connection.dispatcher) {
+            queue.connection.dispatcher.end();
+        }
+        queue.connection = null;
+    }
+    if (queue.voiceChannel) {
+        queue.voiceChannel.leave();
+        queue.voiceChannel = null;
+    }
+}
+
 async function playHelper(queue, song) {
     if (!song) {
-        queue.playing = null;
-        if (queue.connection) {
-            if (queue.connection.dispatcher) {
-                queue.connection.dispatcher.end();
-            }
-            queue.connection = null;
-        }
-        if (queue.voiceChannel) {
-            queue.voiceChannel.leave();
-            queue.voiceChannel = null;
-        }
-        queue.textChannel = null;
-        return;
+        return resetQueue(queue);
     }
     let dispatcher = queue.connection.play(ytdl(song.url), {
         //quality: 'highestaudio',
         //highWaterMark: 1 << 25
     })
         .on("start", () => {
-            const videoEmbed = new Discord.MessageEmbed()
-                .setThumbnail(song.thumbnail)
-                .setAuthor("~Obstacles~")
-                .setColor('RANDOM')
-                .addField('Now Playing', `${song.title}\n ${song.url}`)
-                .addField('Duration', song.duration)
-            if (queue.songs[1]) {
-                videoEmbed.addField('Next Song:', queue.songs[1].title);
-            }
-            queue.textChannel.send(videoEmbed);
             queue.playing = song;
             queue.songs.shift();
-
         })
         .on("finish", () => {
+            if(queue.loop) {
+                queue.songs.unshift(queue.playing);
+            }
+            if(!queue.loop && queue.loopQueue) {
+                queue.songs.push(queue.playing);
+            }
             playHelper(queue, queue.songs[0]);
         })
         .on("error", (err) => {
@@ -67,7 +70,7 @@ async function play(message, queue, songName, silentMode = false) {
         }
         let songRes = await yts(songName);
         let songURL = songRes.all[0].url;
-        if(!songURL) {
+        if (!songURL) {
             return message.channel.send("No such song found!");
         }
         let songInfo = await ytdl.getInfo(songURL);
@@ -77,8 +80,12 @@ async function play(message, queue, songName, silentMode = false) {
             url: songInfo.videoDetails.video_url,
             thumbnail: songInfo.videoDetails.thumbnail.thumbnails[0].url,
             duration: duration,
+            rawDuration: songInfo.videoDetails.lengthSeconds,
+            requestedBy: `${message.author.username} (${message.author.tag})`
         };
         queue.songs.push(song);
+        queue.rawDuration += parseInt(song.rawDuration);
+        queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
         if (!queue.connection) {
             queue.textChannel = message.channel;
             queue.voiceChannel = voiceChannel;
@@ -87,22 +94,21 @@ async function play(message, queue, songName, silentMode = false) {
         }
         try {
             if (!queue.playing) {
-                if(!silentMode) {
-                    message.channel.send(`${song.title} has been added to the queue!`);
+                if (!silentMode) {
+                    message.channel.send(queueEmbed(song, queue));
                 }
                 playHelper(queue, song);
             }
             else {
-                if(!silentMode) {
-                    message.channel.send(`${song.title} has been added to the queue!`);
-                    return currQueue(message, queue);
+                if (!silentMode) {
+                    return message.channel.send(queueEmbed(song, queue));
                 }
                 return;
             }
         }
         catch (err) {
             console.log(err);
-            if(!silentMode){
+            if (!silentMode) {
                 return message.channel.send("Error while playing music!");
             }
             return;
@@ -111,7 +117,7 @@ async function play(message, queue, songName, silentMode = false) {
     }
     catch (err) {
         console.log(err);
-        if(!silentMode) {
+        if (!silentMode) {
             return message.channel.send("Unexpected Error while adding song to queue.");
         }
         return;
@@ -126,6 +132,8 @@ function skip(message, queue) {
         return message.channel.send("Nothing to skip!");
     }
     if (queue.connection.dispatcher) {
+        queue.rawDuration -= parseInt(queue.playing.rawDuration);
+        queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
         queue.connection.dispatcher.end();
         return message.channel.send("Skipping....");
     }
@@ -135,24 +143,49 @@ function stop(message, queue) {
     if (!message.member.voice.channel) {
         return message.channel.send("You need to be in a voice channel to skip music!");
     }
-    queue.songs = [];
-    queue.playing = null;
-    if (queue.connection) {
-        if (queue.connection.dispatcher) {
-            queue.connection.dispatcher.end();
-        }
-        queue.connection = null;
-    }
-    if (queue.voiceChannel) {
-        queue.voiceChannel.leave();
-        queue.voiceChannel = null;
-    }
-    queue.textChannel = null;
+    return resetQueue(queue);
 }
 
 function currQueue(message, queue) {
-    let songList = queue.songs.map(s => s.title);
-    return message.channel.send("Current Queue : " + songList.length + "\n" + songList.map((i) => `${songList.indexOf(i) + 1}. ${i}`).join("\n"));
+    if (!queue.playing) {
+        return message.channel.send("Nothing is playing right now!");
+    }
+    const queueMsg = new Discord.MessageEmbed()
+        .setAuthor('♫	♫  Current Queue  ♫	♫')
+        .setColor('RANDOM')
+        .setDescription(queueDescription(queue))
+        .addFields(
+            { name: 'Queue Size', value: queue.songs.length, inline: true },
+            { name: 'Queue Duration', value: queue.duration, inline: true }
+        )
+    return message.channel.send(queueMsg);
+
+}
+
+function queueDescription(queue) {
+    let des = "";
+    des += `:arrow_forward: [${queue.playing.title}](${queue.playing.url}) \`[${queue.playing.duration}]\` Requested by  \`${queue.playing.requestedBy}\`\n\n`;
+    for (let i = 0; i < queue.songs.length; i++) {
+        let song = queue.songs[i];
+        des += `\`[${i + 1}]\` [${song.title}](${song.url}) \`[${song.duration}]\` Requested by  \`${song.requestedBy}\`\n\n`;
+    }
+    return des;
+}
+
+function queueEmbed(song, queue) {
+    const queueMsg = new Discord.MessageEmbed()
+        .setAuthor('♫	♫  Addded to Queue  ♫	♫')
+        .setThumbnail(song.thumbnail)
+        .setColor('RANDOM')
+        .setDescription(`[${song.title}](${song.url})`)
+        .addFields(
+            { name: 'Song Duration', value: song.duration, inline: true },
+            { name: 'Queue Duration', value: queue.duration, inline: true }
+        )
+    if (queue.playing) {
+        queueMsg.addField('Posiiton in Queue', queue.songs.length)
+    }
+    return queueMsg;
 }
 
 function nowPlaying(message, queue) {
@@ -161,13 +194,84 @@ function nowPlaying(message, queue) {
     }
     const videoEmbed = new Discord.MessageEmbed()
         .setThumbnail(queue.playing.thumbnail)
+        .setAuthor('♫	♫  Now Playing  ♫	♫')
         .setColor('RANDOM')
-        .addField('Now Playing', `${queue.playing.title}\n ${queue.playing.url}`)
-        .addField('Duration', queue.playing.duration)
+        .setDescription(nowPlayingBar(queue))
     if (queue.songs[0]) {
         videoEmbed.addField('Next Song:', queue.songs[0].title);
     }
     return message.channel.send(videoEmbed);
+}
+
+function nowPlayingBar(queue) {
+
+    let passedTimeInMS = queue.connection.dispatcher.streamTime;
+    let passedTimeFormatted = new Date(passedTimeInMS).toISOString().substr(11, 8);
+
+    let totalDurationInMS = queue.playing.rawDuration * 1000;
+    let totalDurationFormatted = new Date(totalDurationInMS).toISOString().substr(11, 8);
+    const playBackBarLocation = Math.round(
+        (passedTimeInMS / totalDurationInMS) * 10
+    );
+    let playBack = '';
+    /*
+    Music bar taken from : https://github.com/galnir/Master-Bot/blob/f963a3fb1f963711ca68aa7bb67c9361c2341639/commands/music/nowplaying.js
+    */
+    for (let i = 1; i < 21; i++) {
+        if (playBackBarLocation == 0) {
+            playBack = ':musical_note:▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
+            break;
+        } else if (playBackBarLocation == 10) {
+            playBack = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬:musical_note:';
+            break;
+        } else if (i == playBackBarLocation * 2) {
+            playBack = playBack + ':musical_note:';
+        } else {
+            playBack = playBack + '▬';
+        }
+    }
+    playBack = `[${queue.playing.title}](${queue.playing.url})\n\n${playBack}\n\n${passedTimeFormatted}/${totalDurationFormatted}\n\nRequested By: \`${queue.playing.requestedBy}\``;
+    return playBack;
+}
+
+function loop(message, queue) {
+    queue.loop = !queue.loop;
+    if (queue.loop) {
+        message.channel.send(":repeat_one: Loop song enabled");
+    }
+    else {
+        message.channel.send("Loop song disabled");
+    }
+}
+
+function loopQueue(message, queue) {
+    queue.loopQueue = !queue.loopQueue;
+    if (queue.loopQueue) {
+        message.channel.send(":repeat: Loop queue enabled");
+    }
+    else {
+        message.channel.send("Loop queue disabled");
+    }
+}
+
+function remove(message, queue, songNumber) {
+    if (!message.member.voice.channel) {
+        return message.channel.send("You need to be in a voice channel to remove from queue!");
+    }
+    if (!queue.playing) {
+        return message.channel.send("Nothing is playing!");
+    }
+    if(!(Number.isInteger(songNumber) && songNumber>0)) {
+        return message.channel.send("Provide a valid number!");
+    }
+    if(songNumber > queue.songs.length) {
+        return message.channel.send("Specify a number less than queue length");
+    }
+    let removeSong = queue.songs[songNumber-1];
+    queue.songs.splice(songNumber - 1, 1);
+    queue.rawDuration -= parseInt(removeSong.rawDuration);
+    queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
+    return message.channel.send(`${removeSong.title} Removed from queue`);
 }
 
 module.exports = {
@@ -176,5 +280,8 @@ module.exports = {
     skip,
     stop,
     currQueue,
-    nowPlaying
+    nowPlaying,
+    loop,
+    loopQueue,
+    remove
 }

@@ -26,7 +26,11 @@ class Obstacles {
             connection : null,
             songs : [],
             volumne : 5,
-            playing: null
+            playing: null,
+            duration : "00:00:00",
+            rawDuration: 0,
+            loop : false,
+            loopQueue: false,
         }
         this.connectSocketServer()
     }
@@ -91,24 +95,18 @@ class Obstacles {
                     .setTitle('Obstacles')
                     .setDescription('Welcome to the help section!')
                     .addFields(
-                        { name: this.prefix+'wake', value: 'Wake Obstacles (only for Servers)' },
-                        { name: this.prefix+'sleep', value: 'Put Obstacles to sleep (only for Servers)' },
                         { name: this.prefix+'quote', value: 'Get an inspirational Quote' },
                         { name: this.prefix+'quote f', value: 'Get an inspirational Quote with Author name' },
                         { name: this.prefix+'mquote', value: 'Get a movie Quote' },
                         { name: this.prefix+'speak <text>', value: 'Speaks out the said text' },
                         { name: this.prefix+'avatar <@mention>', value: 'Gets the avatar of mentioned user' },
                         { name: this.prefix+'skin UserName', value: 'Gets the skin of user' },
-                        { name: this.prefix+'whitelist <word>', value: 'Whitelist the word. (Make sure not to whitelist abusive words'
-                        + ' as I will be capturing usernames too)' },
-                        { name: this.prefix+'nasa <YYYY-MM-DD> <camera>', value: 'Gets the camera image from Curiosity Rover of a'
-                        + ' given date. Both params are optional, default date is today. Cameras are: fhaz (Front Hazard Avoidance Camera), '
-                        +'rhaz(Rear Hazard Avoidance Camera), mast(Mast Camera), chemcam(chemistry and Camera Complex)'
-                        +'mahli(Mars Hand Lens Image), mardi(Mars Descent Imager), navcam(Navigation Camera)'},
+                        { name: this.prefix+'nasa <YYYY-MM-DD> <camera: fhaz/rhaz/mast/chemcam/mahli/mardi/navcam>', value: 'Gets the camera image from Curiosity Rover of a'
+                        + ' given date. Both params are optional, default date is today.'},
                         { name: this.prefix+'todo <add/pop> <item>', value: 'Your personal todo list !' },
                         { name: this.prefix+'math <expression>', value: 'Solves your math homework :p' },
                         { name: this.prefix+'playlist <create/add/view/play> <playlistname> <song>', value: 'Keep your playlist here!' },
-                        { name: this.prefix+'play <youtube url>', value: 'Music commands: play, skip, stop, queue(q), nowplaying(np)' },
+                        { name: this.prefix+'play <song name/youtube url>', value: 'Music commands: play(p), skip, stop, queue(q), nowplaying(np), remove, loop, loopqueue'},
     
                     )
                 return await message.channel.send(helpEmbed);
@@ -510,6 +508,18 @@ class Obstacles {
             }
             if(command === "np" || command === "nowplaying") {
                 return this.api.music.nowPlaying(message, this.queue);
+            }
+            if(command === "loop") {
+                return this.api.music.loop(message,this.queue);
+            }
+            if(command === "loopqueue") {
+                return this.api.music.loopQueue(message,this.queue);
+            }
+            if(command === "remove") {
+                if(args.length !== 1) {
+                    return message.reply("Invalid input, Refer to help section for usages");
+                }
+                return this.api.music.remove(message,this.queue,parseInt(args[0]));
             }
             return message.reply("Whoops I don't know that one yet!")
         }
