@@ -1,6 +1,5 @@
 var mongoutils = require("./mongoutils");
 const when = require("when");
-const { resolve, reject } = require("when");
 
 
 //Profanity Counter

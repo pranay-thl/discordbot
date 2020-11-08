@@ -7,7 +7,10 @@ var api = require("./apis");
 
 var {Obstacles} = require("./obstacles");
 var clientMap = {};
-const client = new Discord.Client();
+const client = new Discord.Client({
+    disableEveryone: true,
+    disabledEvents: ['TYPING_START'],
+});
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
