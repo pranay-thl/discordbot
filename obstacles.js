@@ -165,7 +165,7 @@ class Obstacles {
                     return message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true, size: 1024 })}`);
                 }
     
-                return message.channel.send(`${message.author.username}, your avatar: ${message.author.displayAvatarURL({ dynamic: true })}`);
+                return message.channel.send(`${message.author.username}, your avatar: ${message.author.displayAvatarURL({ dynamic: true, size: 1024 })}`);
             }
             if (command === "voice") {
                 if (process.env.VOICE_SUPPORT === "false") {
