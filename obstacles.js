@@ -8,6 +8,7 @@ const io = require('socket.io-client');
 const when = require('when');
 
 var profanities = require('profanities');
+const { isInteger, arg } = require('mathjs');
 
 class Obstacles {
     constructor(client, serverName, runtime, api) {
@@ -115,6 +116,27 @@ class Obstacles {
                 message.reply("pong");
                 return;
             }
+            // =========Admin Command Starts Here===========
+            if(command === "purge") {
+                if(args.length === 0 || args.length >1 || isNaN(args[0]) || isInteger(args[0]) === false || args[0]<1) {
+                    return message.reply("Invalid argument. Please check "+this.prefix+"help for command usages");
+                }
+                if(message.guild){
+                    if(message.member.roles.cache.get("707713457713053858") || message.author.id === "366182222228619265") {
+                        
+                        let purgeReturn = await message.channel.bulkDelete(parseInt(args[0])+1);
+                        return;
+                        //return message.channel.send(`Purged last ${purgeReturn.size} messages.`);
+                    }
+                    else{
+                        return message.reply("You're not authorized to run this command!");
+                    }
+                }
+                else{
+                    return message.reply("You must be in a Server to run the command!");
+                }
+            }
+            // =========Admin Command Ends Here===========
             if(command === "settings") {
                 if(args.length>1) {
                     if(args[0] === "prefix" && args[1] !=="" && args[1]!=="undefined" && args[1].length == 1) {
@@ -153,6 +175,10 @@ class Obstacles {
             }
             if (command === 'join') {
                 this.client.emit('guildMemberAdd', message.member);
+                return;
+            }
+            if(command === 'leave') {
+                this.client.emit('guildMemberRemove', message.member);
                 return;
             }
             if (command === 'avatar') {
