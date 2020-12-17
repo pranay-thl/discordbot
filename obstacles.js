@@ -484,6 +484,15 @@ class Obstacles {
                 this.runtime.cronjobs.killAll();
                 return message.reply("Cronjobs destroyed");
             }
+            if(command === "serverStatus") {
+                let server = "play.mythicmc.org";
+                if(args[0]) {
+                    server = args[0];
+                }
+                let serverRes = await this.api.serverStatus.fetchStatus(message,server);
+                return;
+
+            }
             if(command === "playlist") {
                 if(args.length === 0) {
                     return message.reply("Invalid input, Refer to help section for usages");
