@@ -466,6 +466,24 @@ class Obstacles {
                     return message.channel.send(mathRes.error.msg);
                 }
             }
+            if(command === "cron") {
+                if(message.author.id !== "366182222228619265") {
+                    return message.reply("TheHurtLocker only.");
+                }
+                if(args.length !==1) {
+                    return message.reply("Invalid usages");
+                }
+                const user = this.getUserFromMention(args[0]);
+                this.runtime.cronjobs.demo(user);
+                return message.reply("Cronjob started");
+            }
+            if(command === "stopcron") {
+                if(message.author.id !== "366182222228619265") {
+                    return message.reply("TheHurtLocker only.");
+                }
+                this.runtime.cronjobs.killAll();
+                return message.reply("Cronjobs destroyed");
+            }
             if(command === "playlist") {
                 if(args.length === 0) {
                     return message.reply("Invalid input, Refer to help section for usages");

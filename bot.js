@@ -213,6 +213,7 @@ runtime.storage.init(settings);
 runtime.storage.connect().then(() => {
     api.init(runtime);
     client.login(process.env.DISCORD_TOKEN);
+    runtime.cronjobs.init(client);
 }).otherwise((err) => {
     console.log(err);
 })
