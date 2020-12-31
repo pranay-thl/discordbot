@@ -470,7 +470,7 @@ class Obstacles {
                 if(message.author.id !== "366182222228619265") {
                     return message.reply("TheHurtLocker only.");
                 }
-                if(args.length !==2) {
+                if(args.length < 2) {
                     return message.reply("Invalid usages");
                 }
                 const user = this.getUserFromMention(args[0]);
