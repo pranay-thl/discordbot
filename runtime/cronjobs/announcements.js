@@ -14,9 +14,9 @@ function killAll() {
     })
 }
 
-function demo(user) {
+function demo(user, msg) {
     let task = cron.schedule('*/3 * * * * *', () => {
-        user.send("Hi");
+        user.send(msg);
     });
     jobs.push(task);
 }
