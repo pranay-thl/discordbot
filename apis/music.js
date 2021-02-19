@@ -35,9 +35,9 @@ async function playHelper(queue, song) {
         return resetQueue(queue);
     }
     let dispatcher = queue.connection.play(ytdl(song.url), {
-        filter: 'audio',
-        quality: 'highestaudio',
-        highWaterMark: 1<<25
+        //filter: 'audio',
+        //quality: 'highestaudio',
+        //highWaterMark: 1<<25
     })
         .on("start", () => {
             queue.playing = song;
