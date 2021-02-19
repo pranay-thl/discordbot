@@ -1,7 +1,6 @@
 //TODO : Add logger
 require('dotenv').config();
 const ytdl = require("ytdl-core");
-const yts = require('yt-search');
 const Youtube = require('simple-youtube-api');
 const youtube = new Youtube(process.env.YOUTUBE_API_KEY);
 const when = require("when");
@@ -36,8 +35,9 @@ async function playHelper(queue, song) {
         return resetQueue(queue);
     }
     let dispatcher = queue.connection.play(ytdl(song.url), {
+        //filter: 'audio',
         //quality: 'highestaudio',
-        //highWaterMark: 1024 * 1024 * 10
+        //highWaterMark: 1<<25
     })
         .on("start", () => {
             queue.playing = song;
@@ -89,7 +89,7 @@ async function play(message, queue, songName, silentMode = false) {
             .replace(/(>|<)/gi, '')
             .split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
             let vId = songName[2].split(/[^0-9a-z_\-]/i)[0];
-            songRes = await youtube.getVideoByID(id);
+            songRes = await youtube.getVideoByID(vId);
             if (!songRes) {
                 return message.channel.send("No such song found!");
             }
