@@ -1,6 +1,9 @@
 //TODO : Add logger
+require('dotenv').config();
 const ytdl = require("ytdl-core");
-const yts = require('yt-search')
+const yts = require('yt-search');
+const Youtube = require('simple-youtube-api');
+const youtube = new Youtube(process.env.YOUTUBE_API_KEY);
 const when = require("when");
 const Discord = require('discord.js');
 var storage;
@@ -34,7 +37,7 @@ async function playHelper(queue, song) {
     }
     let dispatcher = queue.connection.play(ytdl(song.url), {
         //quality: 'highestaudio',
-        //highWaterMark: 1 << 25
+        //highWaterMark: 1024 * 1024 * 10
     })
         .on("start", () => {
             queue.playing = song;
@@ -78,19 +81,35 @@ async function play(message, queue, songName, silentMode = false) {
         if (!perms.has("CONNECT") || !perms.has("SPEAK")) {
             return message.channel.send("I need permission to join and speak in your voice channel!");
         }
-        let songRes = await yts(songName);
-        let songURL = songRes.all[0].url;
-        if (!songURL) {
-            return message.channel.send("No such song found!");
+        let songRes;
+        let vURL;
+        if(songName.match(/^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/)) {
+            vURL = songName;
+            songName = songName
+            .replace(/(>|<)/gi, '')
+            .split(/(vi\/|v=|\/v\/|youtu\.be\/|\/embed\/)/);
+            let vId = songName[2].split(/[^0-9a-z_\-]/i)[0];
+            songRes = await youtube.getVideoByID(id);
+            if (!songRes) {
+                return message.channel.send("No such song found!");
+            }
         }
-        let songInfo = await ytdl.getInfo(songURL);
-        let duration = new Date(songInfo.videoDetails.lengthSeconds * 1000).toISOString().substr(11, 8);
+        else{
+            songRes = await youtube.searchVideos(songName, 1);
+            songRes = songRes[0];
+            if (!songRes) {
+                return message.channel.send("No such song found!");
+            }
+            vURL = `https://www.youtube.com/watch?v=${songRes.id}`;
+            songRes = await youtube.getVideoByID(songRes.id);
+        }
+        let duration = new Date(songRes.duration.seconds * 1000).toISOString().substr(11, 8);
         let song = {
-            title: songInfo.videoDetails.title,
-            url: songInfo.videoDetails.video_url,
-            thumbnail: songInfo.videoDetails.thumbnail.thumbnails[0].url,
+            title: songRes.title,
+            url: vURL,
+            thumbnail: songRes.thumbnails.default.url,
             duration: duration,
-            rawDuration: songInfo.videoDetails.lengthSeconds,
+            rawDuration: songRes.duration.seconds,
             requestedBy: `${message.author.username} (${message.author.tag})`
         };
         queue.songs.push(song);
