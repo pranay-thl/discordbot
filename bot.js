@@ -186,6 +186,7 @@ client.on('guildMemberAdd', async member => {
 });
 
 client.on('guildMemberRemove', async member => {
+    let username = member.user.username;
     let channel = member.guild.channels.cache.find(ch => ch.name === 'member-logs');
     //backward compatibility
     if (!channel) {
@@ -206,7 +207,7 @@ client.on('guildMemberRemove', async member => {
     if (!channel) {
         return;
     }
-    return channel.send(generateGoodbyeMessage(member));
+    return channel.send(generateGoodbyeMessage(username));
 });
 
 runtime.storage.init(settings);

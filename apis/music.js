@@ -62,9 +62,12 @@ async function playHelper(queue, song) {
         })
         .on("error", (err) => {
             console.log(err);
-            queue.textChannel.send('<@366182222228619265> I crashed while playing a song!');
+            //queue.textChannel.send('<@366182222228619265> I crashed while playing a song!');
             queue.rawDuration -= parseInt(queue.playing.rawDuration);
             queue.duration = new Date(queue.rawDuration * 1000).toISOString().substr(11, 8);
+            if(queue.connection.dispatcher) {
+                queue.connection.dispatcher.end();
+            }
             playHelper(queue, queue.songs[0]);
         })
     //dispatcher.setVolumeLogarithmic(queue.volume / 5);
@@ -119,6 +122,7 @@ async function play(message, queue, songName, silentMode = false) {
             queue.textChannel = message.channel;
             queue.voiceChannel = voiceChannel;
             let connection = await voiceChannel.join();
+            connection.voice.setSelfDeaf(true);
             queue.connection = connection;
         }
         try {
