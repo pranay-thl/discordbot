@@ -493,6 +493,13 @@ class Obstacles {
                 return;
 
             }
+            if(command === "unsplash") {
+                let keyword = "mountain";
+                if(args.length === 1) {
+                    keyword = args[0];
+                }
+                return this.api.unsplash.fetchImage(message, keyword);
+            }
             if(command === "playlist") {
                 if(args.length === 0) {
                     return message.reply("Invalid input, Refer to help section for usages");

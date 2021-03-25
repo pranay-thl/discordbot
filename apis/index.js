@@ -5,6 +5,7 @@ var math = require("./math");
 var playlist = require("./playlist");
 var music = require("./music");
 var serverStatus = require("./serverStatus");
+var unsplash = require("./unsplash");
 function init(_runtime) {
     todo.init(_runtime);
     playlist.init(_runtime);
@@ -18,5 +19,6 @@ module.exports = {
     math,
     playlist,
     music,
-    serverStatus
+    serverStatus,
+    unsplash
 }
